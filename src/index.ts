@@ -1,37 +1,61 @@
-import { Configuration, OpenAIApi } from "openai";
-import { env } from "./env.js";
 import fs from "fs";
-import { Model } from "./models.js";
-import * as readline from "readline/promises";
+import { ChatCompletionRequestMessage } from "openai";
+import { openai } from "./utils/config.js";
+import { Model } from "./types/models.js";
 
-const configuration = new Configuration({
-  apiKey: env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
+const messageThread: ChatCompletionRequestMessage[] = [
+  {
+    role: "user",
+    name: "t3dotgg",
+    content: `
+    ===
+    Replying to The Primeagen (@ThePrimeagen)'s tweet:
+    i cannot believe how many devs use 2 monitors
 
-// Find and export models lisit
-// const models = await openai.listModels();
-// const modelList = models.data.data.map((model) => model.id);
-// fs.writeFileSync("src/models.json", JSON.stringify(modelList, null, 2));
+    you just don't know the power of a good window manager and work flow
+    ===
+    I still do most of my work on my laptop on the couch.
+    `,
+  },
+  {
+    role: "user",
+    name: "iamredseal",
+    content: `
+    I wish I could do that. I can't shake the multiple screens but that may be because of the 13" Mac.
+    `,
+  },
+  {
+    role: "user",
+    name: "t3dotgg",
+    content: `
+    I did this on the 11” MacBook Air for years. Never enjoyed a computer bigger than 14
+    `,
+  },
+  {
+    role: "user",
+    name: "iamredseal",
+    content: `
+    being on a couch with an 11"...I feel like my neck would hate me!
+    `,
+  },
+  {
+    role: "system",
+    content: `
+    Write a response to the above chat thread, as a new user to the conversation. It should be short, edgy, and could be a controversial hot take, but must make sense. It must be less than 240 characters. It could cause some nice chaos in the chat thread.
+    `,
+  },
+];
 
-// Get user input from the terminal
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
-
-const input = await rl.question("Enter your question: ");
-rl.close();
-
-const model: Model = "gpt-3.5-turbo";
+const model: Model = "gpt-4";
 const res = await openai.createChatCompletion({
   model,
-  messages: [
-    {
-      role: "user",
-      content: input,
-    },
-  ],
+  messages: messageThread,
+  // messages: [
+  //   {
+  //     role: "user",
+  //     content: input,
+  //   },
+  // ],
   temperature: 1,
   max_tokens: 512,
 });
@@ -45,3 +69,4 @@ fs.writeFileSync(
   "src/out/res.txt",
   res.data.choices[0].message?.content?.trim() ?? ""
 );
+
